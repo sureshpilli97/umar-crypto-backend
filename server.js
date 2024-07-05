@@ -206,6 +206,7 @@ app.get("/WRX-INR", async (req, res) => {
 app.get("/getData", async (req, res) => {
     const url = "https://api.wazirx.com/api/v2/tickers";
     try {
+        console.log("Fetching data from WazirX API...");
         const response = await axios.get(url, {
             headers: {
                 "Content-Type": "application/json",
