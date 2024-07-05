@@ -7,46 +7,58 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-let stocksData = [];
-async function convertToInrList(data) {
-    const resultList = [];
-    for (const key in data) {
-        if (key.includes("inr")) {
-            const entry = data[key];
+const stockList = [];
+async function getData(select) {
+    const url = "https://api.wazirx.com/api/v2/tickers/" + select;
+    try {
+        const response = await axios.get(url, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        await supabase.from("stock").delete();
 
-            // Convert and format numeric fields to three decimal places
-            const formattedEntry = {
-                ...entry,
-                low: parseFloat(entry.low).toFixed(3),
-                high: parseFloat(entry.high).toFixed(3),
-                last: parseFloat(entry.last).toFixed(3),
-                open: parseFloat(entry.open).toFixed(3),
-                sell: parseFloat(entry.sell).toFixed(3),
-                buy: parseFloat(entry.buy).toFixed(3),
-                volume: 0, // Optionally format volume if needed
-            };
-
-            resultList.push(formattedEntry);
-
-            try {
-                const { data: insertedData, error } = await supabase
-                    .from("stock")
-                    .insert(formattedEntry);
-
-                if (error) {
-                    throw error;
-                }
-            } catch (error) {
-                console.error("Error inserting data:", formattedEntry);
-            }
-        }
+        const data = await convertToInrList(response.data, select.slice(0, -3));
+        stockList.push(data);
+    } catch (error) {
+        console.error("Fetch error:", error);
     }
-    return resultList;
+}
+
+async function convertToInrList(data, select) {
+    const entry = data['ticker'];
+    const formattedEntry = {
+        base_unit: select,
+        quote_unit: "inr",
+        type: "SPOT",
+        volume: entry['vol'],
+        low: entry['low'],
+        high: entry['high'],
+        last: entry['last'],
+        buy: entry['buy'],
+        sell: entry['sell'],
+        name: select.toUpperCase() + "INR",
+    };
+
+    try {
+        const { data: insertedData, error } = await supabase
+            .from("stock")
+            .insert(formattedEntry);
+
+        if (error) {
+            throw error;
+        }
+    } catch (error) {
+        console.error("Error inserting data:", formattedEntry);
+    }
+
+    return formattedEntry;
 }
 
 
 
 app.get("/BTC-INR", async (req, res) => {
+    await getData("btcinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -60,6 +72,7 @@ app.get("/BTC-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/ETH-INR", async (req, res) => {
+    await getData("ethinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -73,6 +86,7 @@ app.get("/ETH-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/USDT-INR", async (req, res) => {
+    await getData("usdtinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -86,6 +100,7 @@ app.get("/USDT-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/XRP-INR", async (req, res) => {
+    await getData("xrpinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -99,6 +114,7 @@ app.get("/XRP-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/TRX-INR", async (req, res) => {
+    await getData("trxinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -112,6 +128,7 @@ app.get("/TRX-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/DASH-INR", async (req, res) => {
+    await getData("dashinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -126,6 +143,7 @@ app.get("/DASH-INR", async (req, res) => {
 });
 
 app.get("/ZEC-INR", async (req, res) => {
+    await getData("zecinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -139,6 +157,7 @@ app.get("/ZEC-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/XEM-INR", async (req, res) => {
+    await getData("xeminr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -152,6 +171,7 @@ app.get("/XEM-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/IOST-INR", async (req, res) => {
+    await getData("iostinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -165,6 +185,7 @@ app.get("/IOST-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/WIN-INR", async (req, res) => {
+    await getData("wininr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -178,6 +199,7 @@ app.get("/WIN-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/BTT-INR", async (req, res) => {
+    await getData("bttcinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -191,6 +213,7 @@ app.get("/BTT-INR", async (req, res) => {
     return res.json(stock);
 });
 app.get("/WRX-INR", async (req, res) => {
+    await getData("wrxinr");
     let { data: stock, error } = await supabase
         .from("stock")
         .select("*")
@@ -203,23 +226,7 @@ app.get("/WRX-INR", async (req, res) => {
     }
     return res.json(stock);
 });
-app.get("/getData", async (req, res) => {
-    const url = "https://api.wazirx.com/api/v2/tickers";
-    try {
-        console.log("Fetching data from WazirX API...");
-        const response = await axios.get(url, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        // const { data, error } = await supabase.from("stock").delete();
-        // stocksData = await convertToInrList(response.data);
 
-        return response.data;
-    } catch (error) {
-        console.error("Fetch error:", error);
-    }
-});
 app.get("/", async (req, res) => {
     res.send("Welcome to WazirX API");
 }
