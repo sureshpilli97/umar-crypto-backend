@@ -208,8 +208,8 @@ app.get("/getData", async (req, res) => {
     try {
         console.log("Fetching data from WazirX API...");
 
-        const { data, error } = await supabase.from("stock").delete();
-        // stocksData = await convertToInrList(response.data);
+        // const { data, error } = await supabase.from("stock").delete();
+        stocksData = await convertToInrList(response.data);
 
         return response.data;
     } catch (error) {
