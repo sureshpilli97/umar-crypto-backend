@@ -207,13 +207,9 @@ app.get("/getData", async (req, res) => {
     const url = "https://api.wazirx.com/api/v2/tickers";
     try {
         console.log("Fetching data from WazirX API...");
-        const response = await axios.get(url, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+
         const { data, error } = await supabase.from("stock").delete();
-        stocksData = await convertToInrList(response.data);
+        // stocksData = await convertToInrList(response.data);
 
         return response.data;
     } catch (error) {
